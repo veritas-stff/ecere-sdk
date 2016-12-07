@@ -495,8 +495,13 @@ public:
    {
       if(!active)
       {
-         if(modifiedDocument && !DataBox::SaveData())
-            Refresh();
+         if(modifiedDocument)
+         {
+            if(!DataBox::SaveData())
+               Refresh();
+            else
+               *goOnWithActivation = false;
+         }
       }
       return true;
    }
