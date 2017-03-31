@@ -1,0 +1,126 @@
+{
+   "Version" : 0.2,
+   "ModuleName" : "bgen",
+   "Options" : {
+      "Warnings" : "All",
+      "TargetType" : "Executable",
+      "TargetFileName" : "bgen",
+      "Libraries" : [
+         "ecere"
+      ],
+      "Console" : true
+   },
+   "Configurations" : [
+      {
+         "Name" : "Debug",
+         "Options" : {
+            "Debug" : true,
+            "Optimization" : "None",
+            "PreprocessorDefinitions" : [
+               "_DEBUG"
+            ],
+            "FastMath" : false
+         }
+      },
+      {
+         "Name" : "Release",
+         "Options" : {
+            "Debug" : false,
+            "Optimization" : "Speed",
+            "FastMath" : true
+         }
+      },
+      {
+         "Name" : "MemoryGuard",
+         "Options" : {
+            "Debug" : true,
+            "MemoryGuard" : true,
+            "Optimization" : "None",
+            "PreprocessorDefinitions" : [
+               "_DEBUG"
+            ],
+            "FastMath" : false
+         }
+      }
+   ],
+   "Files" : [
+      {
+         "Folder" : "extras",
+         "Files" : [
+            {
+               "Folder" : "types",
+               "Files" : [
+                  "../extras/types/DynamicString.ec"
+               ]
+            },
+            "consoleApp.ec",
+            "../extras/ecom.ec",
+            "../extras/stringTools.ec"
+         ]
+      },
+      {
+         "Folder" : "src",
+         "Files" : [
+            {
+               "Folder" : "C",
+               "Files" : [
+                  "genC.ec",
+                  "cHeader.ec",
+                  "cCode.ec"
+               ]
+            },
+            {
+               "Folder" : "todo-C++",
+               "Files" : [
+                  "src/C++/genCPP.ec"
+               ]
+            },
+            {
+               "Folder" : "todo-C#",
+               "Files" : [
+                  "src/CSharp/genCSharp.ec"
+               ]
+            },
+            {
+               "Folder" : "todo-Java",
+               "Files" : [
+                  "src/Java/genJava.ec"
+               ]
+            },
+            {
+               "Folder" : "todo-Python",
+               "Files" : [
+                  "src/Python/genPython.ec"
+               ]
+            },
+            "bgen.ec",
+            "str.ec",
+            "out.ec",
+            "tmp.ec",
+            "econe.ec",
+            "ectwo.ec",
+            "gen.ec",
+            "debug.ec",
+            "miscTypes.ec"
+         ]
+      }
+   ],
+   "ResourcesPath" : "",
+   "Resources" : [
+      {
+         "Folder" : "src",
+         "Files" : [
+            {
+               "Folder" : "sys/C/C",
+               "Files" : [
+                  "src/C/c_header_open.src",
+                  "src/C/c_header_close.src",
+                  "src/C/c_header_ec_macros.src",
+                  "src/C/c_header_ec_hardcoded.src",
+                  "src/C/c_header_ec_hardcoded_after.src"
+               ]
+            }
+         ]
+      }
+   ]
+}
