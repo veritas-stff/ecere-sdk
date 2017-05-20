@@ -47,7 +47,7 @@ Time findSymbolTotalTime;
       outputLineNumbers = false;
 
       if(exp)
-         OutputExpression(exp, f);
+         OutputExpression(exp, f, false);
       f.Seek(0, start);
       count = strlen(string);
       count += f.Read(string + count, 1, 1023);

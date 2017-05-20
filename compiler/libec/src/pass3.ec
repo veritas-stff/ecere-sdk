@@ -1393,27 +1393,27 @@ void TopoSort(OldList * input)
          }
 */
             SetOutputLineNumbers(false);
-            OutputExternal(e, f);
+            OutputExternal(e, f, false);
 
             PrintLn("\nDepends on:\n");
             { TopoEdge i; for(i = e.incoming.last; i && !i.breakable && i.from.incoming.count; i = i.in.next) { e = i.from; break; } }
 
-            OutputExternal(e, f);
+            OutputExternal(e, f, false);
 
             PrintLn("\nWhile that depends on:\n");
             { TopoEdge i; for(i = e.incoming.first; i && !i.breakable && i.from.incoming.count; i = i.in.next) { e = i.from; break; } }
 
-            OutputExternal(e, f);
+            OutputExternal(e, f, false);
 
             PrintLn("\nWhile that depends on:\n");
             { TopoEdge i; for(i = e.incoming.first; i && !i.breakable && i.from.incoming.count; i = i.in.next) { e = i.from; break; } }
 
-            OutputExternal(e, f);
+            OutputExternal(e, f, false);
 
             PrintLn("\nWhile that depends on:\n");
             { TopoEdge i; for(i = e.incoming.first; i && !i.breakable && i.from.incoming.count; i = i.in.next) { e = i.from; break; } }
 
-            OutputExternal(e, f);
+            OutputExternal(e, f, false);
             delete f;
 
             system("pause");

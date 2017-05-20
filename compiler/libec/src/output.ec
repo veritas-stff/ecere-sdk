@@ -77,7 +77,7 @@ static void OutputOperator(int op, File f)
    }
 }
 
-public void OutputTypeName(TypeName type, File f, bool typeName)
+public void OutputTypeName(TypeName type, File f, bool typeName, bool bgen)
 {
    /*if(type.typedObject)
    {
@@ -89,14 +89,14 @@ public void OutputTypeName(TypeName type, File f, bool typeName)
       Specifier spec;
       for(spec = type.qualifiers->first; spec; spec = spec.next)
       {
-         OutputSpecifier(spec, f, typeName);
+         OutputSpecifier(spec, f, typeName, bgen);
          if(spec.next) f.Puts(" ");
       }
    }
    if(type.declarator)
    {
       f.Puts(" ");
-      OutputDeclarator(type.declarator, f);
+      OutputDeclarator(type.declarator, f, bgen);
    }
 
    if(/*!type.typedObject && */!type.qualifiers && !type.declarator)
@@ -104,7 +104,7 @@ public void OutputTypeName(TypeName type, File f, bool typeName)
 
 }
 
-public void OutputExpression(Expression exp, File f)
+public void OutputExpression(Expression exp, File f, bool bgen)
 {
    switch(exp.type)
    {
@@ -115,20 +115,20 @@ public void OutputExpression(Expression exp, File f)
             Specifier spec;
             for(spec = exp._classExp.specifiers->first; spec; spec = spec.next)
             {
-               OutputSpecifier(spec, f, false);
+               OutputSpecifier(spec, f, false, bgen);
                if(spec.next) f.Puts(" ");
             }
             if(exp._classExp.decl)
             {
                f.Puts(" ");
-               OutputDeclarator(exp._classExp.decl, f);
+               OutputDeclarator(exp._classExp.decl, f, bgen);
             }
             f.Puts(")");
          }
          break;
       case extensionCompoundExp:
          f.Puts("__extension__ (");
-         OutputStatement(exp.compound, f);
+         OutputStatement(exp.compound, f, bgen);
          f.Puts(")");
          if(inCompiler && outputLineNumbers && exp.loc.end.line)
          {
@@ -141,35 +141,35 @@ public void OutputExpression(Expression exp, File f)
       case newExp:
          f.Puts("new ");
          f.Puts(" ");
-         OutputTypeName(exp._renew.typeName, f, false);
+         OutputTypeName(exp._renew.typeName, f, false, bgen);
          f.Puts("[");
-         OutputExpression(exp._renew.size, f);
+         OutputExpression(exp._renew.size, f, bgen);
          f.Puts("]");
          break;
       case new0Exp:
          f.Puts("new0 ");
          f.Puts(" ");
-         OutputTypeName(exp._renew.typeName, f, false);
+         OutputTypeName(exp._renew.typeName, f, false, bgen);
          f.Puts("[");
-         OutputExpression(exp._renew.size, f);
+         OutputExpression(exp._renew.size, f, bgen);
          f.Puts("]");
          break;
       case renewExp:
          f.Puts("renew ");
-         OutputExpression(exp._renew.exp, f);
+         OutputExpression(exp._renew.exp, f, bgen);
          f.Puts(" ");
-         OutputTypeName(exp._renew.typeName, f, false);
+         OutputTypeName(exp._renew.typeName, f, false, bgen);
          f.Puts("[");
-         OutputExpression(exp._renew.size, f);
+         OutputExpression(exp._renew.size, f, bgen);
          f.Puts("]");
          break;
       case renew0Exp:
          f.Puts("renew0 ");
-         OutputExpression(exp._renew.exp, f);
+         OutputExpression(exp._renew.exp, f, bgen);
          f.Puts(" ");
-         OutputTypeName(exp._renew.typeName, f, false);
+         OutputTypeName(exp._renew.typeName, f, false, bgen);
          f.Puts("[");
-         OutputExpression(exp._renew.size, f);
+         OutputExpression(exp._renew.size, f, bgen);
          f.Puts("]");
          break;
       case identifierExp:
@@ -178,7 +178,7 @@ public void OutputExpression(Expression exp, File f)
          break;
       case instanceExp:
          if(exp.instance)
-            OutputInstance(exp.instance, f);
+            OutputInstance(exp.instance, f, bgen);
          break;
       case constantExp:
          if(exp.constant)
@@ -191,7 +191,7 @@ public void OutputExpression(Expression exp, File f)
       case opExp:
          if(exp.op.exp1)
          {
-            OutputExpression(exp.op.exp1, f);
+            OutputExpression(exp.op.exp1, f, bgen);
             if(exp.op.exp2)
                f.Puts(" ");
          }
@@ -200,7 +200,7 @@ public void OutputExpression(Expression exp, File f)
          {
             if(exp.op.exp1 || (exp.op.exp2.type == opExp && !exp.op.exp2.op.exp1 && exp.op.exp2.op.op == exp.op.op))
                f.Puts(" ");
-            OutputExpression(exp.op.exp2, f);
+            OutputExpression(exp.op.exp2, f, bgen);
          }
          break;
       case extensionExpressionExp:
@@ -214,7 +214,7 @@ public void OutputExpression(Expression exp, File f)
          {
             for(expression = exp.list->first; expression; expression = expression.next)
             {
-               OutputExpression(expression, f);
+               OutputExpression(expression, f, bgen);
                if(expression.next) f.Puts(", ");
             }
          }
@@ -225,12 +225,12 @@ public void OutputExpression(Expression exp, File f)
       {
          Expression expression;
          if(exp.index.exp)
-            OutputExpression(exp.index.exp, f);
+            OutputExpression(exp.index.exp, f, bgen);
          f.Puts("[");
          if(exp.index.index)
             for(expression = exp.index.index->first; expression; expression = expression.next)
             {
-               OutputExpression(expression, f);
+               OutputExpression(expression, f, bgen);
                if(expression.next) f.Puts(", ");
             }
          f.Puts("]");
@@ -238,14 +238,14 @@ public void OutputExpression(Expression exp, File f)
       }
       case callExp:
       {
-         OutputExpression(exp.call.exp, f);
+         OutputExpression(exp.call.exp, f, bgen);
          f.Puts("(");
          if(exp.call.arguments)
          {
             Expression expression;
             for(expression = exp.call.arguments->first; expression; expression = expression.next)
             {
-               OutputExpression(expression, f);
+               OutputExpression(expression, f, bgen);
                if(expression.next) f.Puts(", ");
             }
          }
@@ -254,30 +254,30 @@ public void OutputExpression(Expression exp, File f)
       }
       case memberExp:
          if(exp.member.exp)
-            OutputExpression(exp.member.exp, f);
+            OutputExpression(exp.member.exp, f, bgen);
          f.Puts(".");
          if(exp.member.member)
             OutputIdentifier(exp.member.member, f);
          break;
       case pointerExp:
-         OutputExpression(exp.member.exp, f);
+         OutputExpression(exp.member.exp, f, bgen);
          f.Puts("->");
          OutputIdentifier(exp.member.member, f);
          break;
       case typeSizeExp:
          f.Puts("sizeof(");
-         OutputTypeName(exp.typeName, f, false);
+         OutputTypeName(exp.typeName, f, false, bgen);
          f.Puts(")");
          break;
       case typeAlignExp:
          f.Puts("__alignof__(");
-         OutputTypeName(exp.typeName, f, false);
+         OutputTypeName(exp.typeName, f, false, bgen);
          f.Puts(")");
          break;
       case offsetOfExp:
          f.Puts("__builtin_offsetof(");
          if(exp.typeName)
-            OutputTypeName(exp.typeName, f, false);
+            OutputTypeName(exp.typeName, f, false, bgen);
          f.Puts(", ");
          if(exp.identifier)
             OutputIdentifier(exp.identifier, f);
@@ -286,38 +286,38 @@ public void OutputExpression(Expression exp, File f)
       case extensionInitializerExp:
          f.Puts("__extension__ (");
          if(exp.initializer.typeName)
-            OutputTypeName(exp.initializer.typeName, f, false);
+            OutputTypeName(exp.initializer.typeName, f, false, bgen);
          f.Puts(")");
          if(exp.initializer.initializer)
-            OutputInitializer(exp.initializer.initializer, f);
+            OutputInitializer(exp.initializer.initializer, f, bgen);
          break;
       case castExp:
          f.Puts("(");
-         OutputTypeName(exp.cast.typeName, f, false);
+         OutputTypeName(exp.cast.typeName, f, false, bgen);
          f.Puts(")");
          if(exp.cast.exp)
-            OutputExpression(exp.cast.exp, f);
+            OutputExpression(exp.cast.exp, f, bgen);
          break;
       case conditionExp:
-         OutputExpression(exp.cond.cond, f);
+         OutputExpression(exp.cond.cond, f, bgen);
          f.Puts(" ? ");
          {
             Expression expression;
             for(expression = exp.cond.exp->first; expression; expression = expression.next)
             {
-               OutputExpression(expression, f);
+               OutputExpression(expression, f, bgen);
                if(expression.next) f.Puts(", ");
             }
          }
          f.Puts(" : ");
          if(exp.cond.elseExp)
-            OutputExpression(exp.cond.elseExp, f);
+            OutputExpression(exp.cond.elseExp, f, bgen);
          break;
       case vaArgExp:
          f.Puts("__builtin_va_arg(");
-         OutputExpression(exp.vaArg.exp, f);
+         OutputExpression(exp.vaArg.exp, f, bgen);
          f.Puts(", ");
-         OutputTypeName(exp.vaArg.typeName, f, false);
+         OutputTypeName(exp.vaArg.typeName, f, false, bgen);
          f.Puts(")");
          break;
       case arrayExp:
@@ -327,7 +327,7 @@ public void OutputExpression(Expression exp, File f)
             Expression expression;
             for(expression = exp.list->first; expression; expression = expression.next)
             {
-               OutputExpression(expression, f);
+               OutputExpression(expression, f, bgen);
                if(expression.next) f.Puts(", ");
             }
          }
@@ -336,7 +336,7 @@ public void OutputExpression(Expression exp, File f)
    }
 }
 
-static void OutputAsmField(AsmField field, File f)
+static void OutputAsmField(AsmField field, File f, bool bgen)
 {
    if(field.symbolic)
    {
@@ -348,7 +348,7 @@ static void OutputAsmField(AsmField field, File f)
    if(field.expression)
    {
       f.Puts("(");
-      OutputExpression(field.expression, f);
+      OutputExpression(field.expression, f, bgen);
       f.Puts(")");
    }
 }
@@ -367,7 +367,7 @@ static void GetSourceName(char * name, const char * src)
    ChangeCh(name, '\\', '/');
 }
 
-static void OutputStatement(Statement stmt, File f)
+static void OutputStatement(Statement stmt, File f, bool bgen)
 {
    char name[MAX_FILENAME] = "";
    char origName[MAX_FILENAME] = "";
@@ -392,7 +392,7 @@ static void OutputStatement(Statement stmt, File f)
    switch(stmt.type)
    {
       case badDeclarationStmt:
-         OutputDeclaration(stmt.decl, f);
+         OutputDeclaration(stmt.decl, f, bgen);
          break;
       case labeledStmt:
          OutputIdentifier(stmt.labeled.id, f);
@@ -401,14 +401,14 @@ static void OutputStatement(Statement stmt, File f)
          if(stmt.labeled.stmt)
          {
             if(stmt.labeled.stmt.type == badDeclarationStmt) f.Puts("; ");
-            OutputStatement(stmt.labeled.stmt, f);
+            OutputStatement(stmt.labeled.stmt, f, bgen);
          }
          break;
       case caseStmt:
          if(stmt.caseStmt.exp)
          {
             f.Puts("case ");
-            OutputExpression(stmt.caseStmt.exp, f);
+            OutputExpression(stmt.caseStmt.exp, f, bgen);
             f.Puts(":\n");
             outputLine ++;
          }
@@ -420,7 +420,7 @@ static void OutputStatement(Statement stmt, File f)
          if(stmt.caseStmt.stmt)
          {
             if(stmt.caseStmt.stmt.type == badDeclarationStmt) f.Puts("; ");
-            OutputStatement(stmt.caseStmt.stmt, f);
+            OutputStatement(stmt.caseStmt.stmt, f, bgen);
          }
          break;
       case compoundStmt:
@@ -432,7 +432,7 @@ static void OutputStatement(Statement stmt, File f)
             Declaration decl;
             for(decl = stmt.compound.declarations->first; decl; decl = decl.next)
             {
-               OutputDeclaration(decl, f);
+               OutputDeclaration(decl, f, bgen);
 
             }
          }
@@ -446,7 +446,7 @@ static void OutputStatement(Statement stmt, File f)
             }
             for(statement = stmt.compound.statements->first; statement; statement = statement.next)
             {
-               OutputStatement(statement, f);
+               OutputStatement(statement, f, bgen);
                f.Puts("\n");
                outputLine ++;
             }
@@ -470,7 +470,7 @@ static void OutputStatement(Statement stmt, File f)
             Expression exp;
             for(exp = stmt.expressions->first; exp; exp = exp.next)
             {
-               OutputExpression(exp, f);
+               OutputExpression(exp, f, bgen);
                if(exp.next) f.Puts(", ");
             }
          }
@@ -483,13 +483,13 @@ static void OutputStatement(Statement stmt, File f)
          f.Puts("if(");
          for(exp = stmt.ifStmt.exp->first; exp; exp = exp.next)
          {
-            OutputExpression(exp, f);
+            OutputExpression(exp, f, bgen);
             if(exp.next) f.Puts(", ");
          }
          f.Puts(")\n");
          outputLine ++;
          if(stmt.ifStmt.stmt)
-            OutputStatement(stmt.ifStmt.stmt, f);
+            OutputStatement(stmt.ifStmt.stmt, f, bgen);
          if(stmt.ifStmt.elseStmt)
          {
             f.Puts("\n");
@@ -502,7 +502,7 @@ static void OutputStatement(Statement stmt, File f)
             }
             else
                f.Puts(" ");
-            OutputStatement(stmt.ifStmt.elseStmt, f);
+            OutputStatement(stmt.ifStmt.elseStmt, f, bgen);
          }
          break;
       }
@@ -514,13 +514,13 @@ static void OutputStatement(Statement stmt, File f)
          {
             for(exp = stmt.switchStmt.exp->first; exp; exp = exp.next)
             {
-               OutputExpression(exp, f);
+               OutputExpression(exp, f, bgen);
                if(exp.next) f.Puts(", ");
             }
          }
          f.Puts(")\n");
          outputLine ++;
-         OutputStatement(stmt.switchStmt.stmt, f);
+         OutputStatement(stmt.switchStmt.stmt, f, bgen);
          break;
       }
       case whileStmt:
@@ -531,13 +531,13 @@ static void OutputStatement(Statement stmt, File f)
          {
             for(exp = stmt.switchStmt.exp->first; exp; exp = exp.next)
             {
-               OutputExpression(exp, f);
+               OutputExpression(exp, f, bgen);
                if(exp.next) f.Puts(", ");
             }
          }
          f.Puts(")\n");
          outputLine ++;
-         OutputStatement(stmt.whileStmt.stmt, f);
+         OutputStatement(stmt.whileStmt.stmt, f, bgen);
          break;
       }
       case doWhileStmt:
@@ -545,11 +545,11 @@ static void OutputStatement(Statement stmt, File f)
          Expression exp;
          f.Puts("do\n");
          outputLine ++;
-         OutputStatement(stmt.whileStmt.stmt, f);
+         OutputStatement(stmt.whileStmt.stmt, f, bgen);
          f.Puts("while(");
          for(exp = stmt.switchStmt.exp->first; exp; exp = exp.next)
          {
-            OutputExpression(exp, f);
+            OutputExpression(exp, f, bgen);
             if(exp.next) f.Puts(", ");
          }
          f.Puts(");");
@@ -559,9 +559,9 @@ static void OutputStatement(Statement stmt, File f)
       {
          Expression exp;
          f.Puts("for(");
-         OutputStatement(stmt.forStmt.init, f);
+         OutputStatement(stmt.forStmt.init, f, bgen);
          f.Puts(" ");
-         OutputStatement(stmt.forStmt.check, f);
+         OutputStatement(stmt.forStmt.check, f, bgen);
          f.Puts(" ");
          if(stmt.forStmt.increment)
          {
@@ -577,13 +577,13 @@ static void OutputStatement(Statement stmt, File f)
 
             for(exp = stmt.forStmt.increment->first; exp; exp = exp.next)
             {
-               OutputExpression(exp, f);
+               OutputExpression(exp, f, bgen);
                if(exp.next) f.Puts(", ");
             }
          }
          f.Puts(")\n");
          outputLine ++;
-         OutputStatement(stmt.forStmt.stmt, f);
+         OutputStatement(stmt.forStmt.stmt, f, bgen);
          break;
       }
       case gotoStmt:
@@ -645,7 +645,7 @@ static void OutputStatement(Statement stmt, File f)
 
                typeName = MkTypeName(specs, decl);
                InstDeclPassTypeName(typeName, false);
-               OutputTypeName(typeName, f, false);
+               OutputTypeName(typeName, f, false, bgen);
                f.Printf(";");
                FreeTypeName(typeName);
             }
@@ -663,7 +663,7 @@ static void OutputStatement(Statement stmt, File f)
          {
             for(exp = stmt.expressions->first; exp; exp = exp.next)
             {
-               OutputExpression(exp, f);
+               OutputExpression(exp, f, bgen);
                if(exp.next) f.Puts(", ");
             }
          }
@@ -688,7 +688,7 @@ static void OutputStatement(Statement stmt, File f)
          AsmField field;
          f.Puts("__asm__ ");
          if(stmt.asmStmt.spec)
-            OutputSpecifier(stmt.asmStmt.spec, f, false);
+            OutputSpecifier(stmt.asmStmt.spec, f, false, bgen);
          f.Puts("(");
          f.Puts(stmt.asmStmt.statements);
 
@@ -700,7 +700,7 @@ static void OutputStatement(Statement stmt, File f)
                for(field = stmt.asmStmt.inputFields->first; field; field = field.next)
                {
                   if(field.prev) f.Puts(",");
-                  OutputAsmField(field, f);
+                  OutputAsmField(field, f, bgen);
                }
             }
          }
@@ -712,7 +712,7 @@ static void OutputStatement(Statement stmt, File f)
                for(field = stmt.asmStmt.outputFields->first; field; field = field.next)
                {
                   if(field.prev) f.Puts(",");
-                  OutputAsmField(field, f);
+                  OutputAsmField(field, f, bgen);
                }
             }
          }
@@ -722,7 +722,7 @@ static void OutputStatement(Statement stmt, File f)
             for(field = stmt.asmStmt.clobberedFields->first; field; field = field.next)
             {
                if(field.prev) f.Puts(",");
-               OutputAsmField(field, f);
+               OutputAsmField(field, f, bgen);
             }
          }
          f.Puts(");\n");
@@ -738,7 +738,7 @@ static void OutputStatement(Statement stmt, File f)
    }
 }
 
-static void OutputPointer(Pointer ptr, File f)
+static void OutputPointer(Pointer ptr, File f, bool bgen)
 {
    f.Puts("*");
    if(ptr.qualifiers)
@@ -747,39 +747,39 @@ static void OutputPointer(Pointer ptr, File f)
       f.Puts(" ");
       for(spec = ptr.qualifiers->first; spec; spec = spec.next)
       {
-         OutputSpecifier(spec, f, false);
+         OutputSpecifier(spec, f, false, bgen);
          if(spec.next) f.Puts(" ");
       }
    }
    if(ptr.pointer)
    {
-      OutputPointer(ptr.pointer, f);
+      OutputPointer(ptr.pointer, f, bgen);
    }
 }
 
-static void OutputDeclarator(Declarator decl, File f)
+static void OutputDeclarator(Declarator decl, File f, bool bgen)
 {
    switch(decl.type)
    {
       case structDeclarator:
          if(decl.declarator)
          {
-            OutputDeclarator(decl.declarator, f);
+            OutputDeclarator(decl.declarator, f, bgen);
          }
          if(decl.structDecl.exp)
          {
             f.Puts(" : ");
-            OutputExpression(decl.structDecl.exp, f);
+            OutputExpression(decl.structDecl.exp, f, bgen);
          }
          if(decl.structDecl.posExp)
          {
             f.Puts(" : ");
-            OutputExpression(decl.structDecl.posExp, f);
+            OutputExpression(decl.structDecl.posExp, f, bgen);
          }
          if(decl.structDecl.attrib)
          {
             f.Puts(" ");
-            OutputAttrib(decl.structDecl.attrib, f);
+            OutputAttrib(decl.structDecl.attrib, f, bgen);
          }
          break;
       case identifierDeclarator:
@@ -787,24 +787,25 @@ static void OutputDeclarator(Declarator decl, File f)
          break;
       case bracketsDeclarator:
          f.Puts("(");
-         OutputDeclarator(decl.declarator, f);
+
+         OutputDeclarator(decl.declarator, f, bgen);
          f.Puts(")");
          break;
       case extendedDeclarator:
-         if(decl.extended.extended) OutputExtDecl(decl.extended.extended, f);
+         if(decl.extended.extended) OutputExtDecl(decl.extended.extended, f, bgen);
          f.Puts(" ");
-         OutputDeclarator(decl.declarator, f);
+         OutputDeclarator(decl.declarator, f, bgen);
          break;
       case extendedDeclaratorEnd:
-         OutputDeclarator(decl.declarator, f);
+         OutputDeclarator(decl.declarator, f, bgen);
          f.Puts(" ");
          if(decl.extended.extended)
-            OutputExtDecl(decl.extended.extended, f);
+            OutputExtDecl(decl.extended.extended, f, bgen);
          break;
       case arrayDeclarator:
          if(decl.declarator)
          {
-            OutputDeclarator(decl.declarator, f);
+            OutputDeclarator(decl.declarator, f, bgen);
          }
          f.Puts("[");
          if(decl.array.exp)
@@ -813,7 +814,7 @@ static void OutputDeclarator(Declarator decl, File f)
             ProcessExpressionType(decl.array.exp);
             ComputeExpression(decl.array.exp);
 
-            OutputExpression(decl.array.exp, f);
+            OutputExpression(decl.array.exp, f, bgen);
          }
          else if(decl.array.enumClass)
          {
@@ -830,13 +831,13 @@ static void OutputDeclarator(Declarator decl, File f)
          TypeName param;
 
          if(decl.declarator)
-            OutputDeclarator(decl.declarator, f);
+            OutputDeclarator(decl.declarator, f, bgen);
          f.Puts("(");
          if(decl.function.parameters && decl.function.parameters->first)
          {
             for(param = decl.function.parameters->first; param; param = param.next)
             {
-               OutputTypeName(param, f, false);
+               OutputTypeName(param, f, false, bgen);
                if(param.next)
                   f.Puts(", ");
             }
@@ -845,38 +846,38 @@ static void OutputDeclarator(Declarator decl, File f)
          break;
       }
       case pointerDeclarator:
-         if(decl.pointer.pointer) OutputPointer(decl.pointer.pointer, f);
+         if(decl.pointer.pointer) OutputPointer(decl.pointer.pointer, f, bgen);
          if(decl.declarator)
          {
             f.Puts(" ");
-            OutputDeclarator(decl.declarator, f);
+            OutputDeclarator(decl.declarator, f, bgen);
          }
          break;
    }
 }
 
-static void OutputEnumerator(Enumerator enumerator, File f)
+static void OutputEnumerator(Enumerator enumerator, File f, bool enumclass, bool bgen)
 {
    OutputIdentifier(enumerator.id, f);
    if(enumerator.exp)
    {
       f.Puts(" = ");
-      OutputExpression(enumerator.exp, f);
+      OutputExpression(enumerator.exp, f, bgen);
    }
 }
 
-static void OutputAttribute(Attribute attr, File f)
+static void OutputAttribute(Attribute attr, File f, bool bgen)
 {
    if(attr.attr)
       f.Puts(attr.attr);
    if(attr.exp)
    {
       f.Puts(" ");
-      OutputExpression(attr.exp, f);
+      OutputExpression(attr.exp, f, bgen);
    }
 }
 
-static void OutputAttrib(Attrib attr, File f)
+static void OutputAttrib(Attrib attr, File f, bool bgen)
 {
    switch(attr.type)
    {
@@ -891,21 +892,21 @@ static void OutputAttrib(Attrib attr, File f)
       for(attrib = attr.attribs->first; attrib; attrib = attrib.next)
       {
          if(attrib.prev) f.Puts(", ");
-         OutputAttribute(attrib, f);
+         OutputAttribute(attrib, f, bgen);
       }
    }
    f.Puts("))");
 }
 
-static void OutputExtDecl(ExtDecl extDecl, File f)
+static void OutputExtDecl(ExtDecl extDecl, File f, bool bgen)
 {
    if(extDecl.type == extDeclString && extDecl.s)
       f.Puts(extDecl.s);
    else if(extDecl.type == extDeclAttrib)
-      OutputAttrib(extDecl.attr, f);
+      OutputAttrib(extDecl.attr, f, bgen);
 }
 
-static void OutputSpecifier(Specifier spec, File f, bool typeName)
+static void OutputSpecifier(Specifier spec, File f, bool typeName, bool bgen)
 {
    switch(spec.type)
    {
@@ -1011,7 +1012,7 @@ static void OutputSpecifier(Specifier spec, File f, bool typeName)
          break;
       case extendedSpecifier:
          if(spec.extDecl)
-            OutputExtDecl(spec.extDecl, f);
+            OutputExtDecl(spec.extDecl, f, bgen);
          break;
       case nameSpecifier:
       //case classSpecifier:
@@ -1027,7 +1028,10 @@ static void OutputSpecifier(Specifier spec, File f, bool typeName)
                symbol = FindClass(spec.name);
             if(symbol)
             {
-               f.Puts(symbol.string ? symbol.string : "(null)");
+               if(bgen && symbol.string)
+                  f.Printf("C(%s)", symbol.string);
+               else
+                  f.Puts(symbol.string ? symbol.string : "(null)");
             }
             else if(spec.name)
                f.Puts(spec.name);
@@ -1048,7 +1052,7 @@ static void OutputSpecifier(Specifier spec, File f, bool typeName)
             outputLine += 2;
             for(enumerator = spec.list->first; enumerator; enumerator = enumerator.next)
             {
-               OutputEnumerator(enumerator, f);
+               OutputEnumerator(enumerator, f, false, bgen);
                if(enumerator.next) f.Puts(", ");
             }
             f.Puts("\n}");
@@ -1063,7 +1067,7 @@ static void OutputSpecifier(Specifier spec, File f, bool typeName)
          if(spec.extDeclStruct)
          {
             f.Puts(" ");
-            OutputExtDecl(spec.extDeclStruct, f);
+            OutputExtDecl(spec.extDeclStruct, f, bgen);
          }
          if(spec.id)
          {
@@ -1078,7 +1082,7 @@ static void OutputSpecifier(Specifier spec, File f, bool typeName)
             for(def = spec.definitions->first; def; def = def.next)
             {
                //OutputDeclaration(decl, f);
-               OutputClassDef(def, f);
+               OutputClassDef(def, f, bgen);
             }
             f.Puts("} ecere_gcc_struct");
          }
@@ -1086,12 +1090,12 @@ static void OutputSpecifier(Specifier spec, File f, bool typeName)
       }
       case typeOfSpecifier:
          f.Puts("__typeof(");
-         OutputExpression(spec.expression, f);
+         OutputExpression(spec.expression, f, bgen);
          f.Puts(")");
          break;
       case subClassSpecifier:
          f.Puts("subclass(");
-         OutputSpecifier(spec._class, f, false);
+         OutputSpecifier(spec._class, f, false, bgen);
          f.Puts(")");
          break;
       case templateTypeSpecifier:
@@ -1100,7 +1104,7 @@ static void OutputSpecifier(Specifier spec, File f, bool typeName)
    }
 }
 
-static void OutputInitializer(Initializer initializer, File f)
+static void OutputInitializer(Initializer initializer, File f, bool bgen)
 {
    char name[MAX_FILENAME] = "";
    char origName[MAX_FILENAME] = "";
@@ -1143,7 +1147,7 @@ static void OutputInitializer(Initializer initializer, File f)
 
          for(init = initializer.list->first; init; init = init.next)
          {
-            OutputInitializer(init, f);
+            OutputInitializer(init, f, bgen);
             if(init.next) f.Puts(init.next.type == listInitializer ? "," : ", ");
          }
          f.Puts("\n}");
@@ -1164,23 +1168,23 @@ static void OutputInitializer(Initializer initializer, File f)
          if(initializer.id)
             f.Puts(" ");
          if(initializer.exp)
-            OutputExpression(initializer.exp, f);
+            OutputExpression(initializer.exp, f, bgen);
          break;
    }
 }
 
-static void OutputInitDeclarator(InitDeclarator decl, File f)
+static void OutputInitDeclarator(InitDeclarator decl, File f, bool bgen)
 {
-   OutputDeclarator(decl.declarator, f);
+   OutputDeclarator(decl.declarator, f, bgen);
    if(decl.initializer)
    {
       f.Puts(" =");
       if(decl.initializer.type == expInitializer) f.Puts(" ");
-      OutputInitializer(decl.initializer, f);
+      OutputInitializer(decl.initializer, f, bgen);
    }
 }
 
-static void OutputDeclaration(Declaration decl, File f)
+static void OutputDeclaration(Declaration decl, File f, bool bgen)
 {
    Specifier spec;
    char origName[MAX_FILENAME];
@@ -1232,7 +1236,7 @@ static void OutputDeclaration(Declaration decl, File f)
             {
                if(spec.type == baseSpecifier && spec.specifier == TYPEDEF)
                   inTypeDef = true;
-               OutputSpecifier(spec, f, inTypeDef && !spec.next);
+               OutputSpecifier(spec, f, inTypeDef && !spec.next, false);
                if(spec.next) f.Puts(" ");
             }
          }
@@ -1242,7 +1246,7 @@ static void OutputDeclaration(Declaration decl, File f)
 
             for(d = decl.declarators->first; d; d = d.next)
             {
-               OutputInitDeclarator(d, f);
+               OutputInitDeclarator(d, f, bgen);
                if(d.next) f.Puts(", ");
             }
          }
@@ -1254,7 +1258,7 @@ static void OutputDeclaration(Declaration decl, File f)
          {
             for(spec = decl.specifiers->first; spec; spec = spec.next)
             {
-               OutputSpecifier(spec, f, false);
+               OutputSpecifier(spec, f, false, false);
                if(spec.next) f.Puts(" ");
             }
          }
@@ -1265,21 +1269,21 @@ static void OutputDeclaration(Declaration decl, File f)
 
             for(d = decl.declarators->first; d; d = d.next)
             {
-               OutputDeclarator(d, f);
+               OutputDeclarator(d, f, bgen);
                if(d.next) f.Puts(", ");
             }
          }
          if(decl.extStorage)
          {
             f.Puts(" ");
-            OutputSpecifier(decl.extStorage, f, false);
+            OutputSpecifier(decl.extStorage, f, false, false);
          }
          break;
       }
       case instDeclaration:
          if(decl.inst)
          {
-            OutputInstance(decl.inst, f);
+            OutputInstance(decl.inst, f, bgen);
          }
          break;
       case defineDeclaration:
@@ -1296,7 +1300,7 @@ static void OutputDeclaration(Declaration decl, File f)
 
 static FunctionDefinition curFunction;
 
-static void OutputFunction(FunctionDefinition func, File f)
+static void OutputFunction(FunctionDefinition func, File f, bool bgen)
 {
    FunctionDefinition oldFunc = curFunction;
    curFunction = func;
@@ -1305,12 +1309,12 @@ static void OutputFunction(FunctionDefinition func, File f)
       Specifier spec;
       for(spec = func.specifiers->first; spec; spec = spec.next)
       {
-         OutputSpecifier(spec, f, false);
+         OutputSpecifier(spec, f, false, false);
          if(spec.next) f.Puts(" ");
       }
       f.Puts(" ");
    }
-   if(func.declarator) OutputDeclarator(func.declarator, f);
+   if(func.declarator) OutputDeclarator(func.declarator, f, bgen);
    f.Puts("\n");
    outputLine ++;
    if(func.declarations)
@@ -1318,7 +1322,7 @@ static void OutputFunction(FunctionDefinition func, File f)
       Declaration decl;
       for(decl = func.declarations->first; decl; decl = decl.next)
       {
-         OutputDeclaration(decl, f);
+         OutputDeclaration(decl, f, bgen);
       }
       f.Puts("\n");
       outputLine ++;
@@ -1336,7 +1340,7 @@ static void OutputFunction(FunctionDefinition func, File f)
          f.Printf("   __ecereNameSpace__ecere__com__MemoryGuard_PushLoc(\"%s:%s\");\n", name, id.string);
          outputLine += 2;
       }
-      OutputStatement(func.body, f);
+      OutputStatement(func.body, f, bgen);
       if(inCompiler && memoryGuard)
       {
          f.Printf("   __ecereNameSpace__ecere__com__MemoryGuard_PopLoc();\n");
@@ -1349,7 +1353,7 @@ static void OutputFunction(FunctionDefinition func, File f)
    curFunction = oldFunc;
 }
 
-static void OutputMemberInit(MemberInit init, File f)
+static void OutputMemberInit(MemberInit init, File f, bool bgen)
 {
    if(init.identifiers)
    {
@@ -1371,10 +1375,10 @@ static void OutputMemberInit(MemberInit init, File f)
       if(init.initializer && init.initializer.type == expInitializer) f.Puts(" ");
    }
    if(init.initializer)
-      OutputInitializer(init.initializer, f);
+      OutputInitializer(init.initializer, f, bgen);
 }
 
-static void OutputMembersInit(MembersInit init, File f)
+static void OutputMembersInit(MembersInit init, File f, bool bgen)
 {
    switch(init.type)
    {
@@ -1385,26 +1389,26 @@ static void OutputMembersInit(MembersInit init, File f)
          {
             for(member = init.dataMembers->first; member; member = member.next)
             {
-               OutputMemberInit(member, f);
+               OutputMemberInit(member, f, bgen);
                if(member.next) f.Puts(", ");
             }
          }
          break;
       }
       case methodMembersInit:
-         OutputClassFunction(init.function, f);
+         OutputClassFunction(init.function, f, bgen);
          break;
    }
 }
 
-static void OutputInstance(Instantiation inst, File f)
+static void OutputInstance(Instantiation inst, File f, bool bgen)
 {
    if(inst._class)
-      OutputSpecifier(inst._class, f, false);
+      OutputSpecifier(inst._class, f, false, false);
    if(inst.exp)
    {
       f.Puts(" ");
-      OutputExpression(inst.exp, f);
+      OutputExpression(inst.exp, f, bgen);
    }
    if(inst.members && inst.members->count > 1)
    {
@@ -1420,7 +1424,7 @@ static void OutputInstance(Instantiation inst, File f)
       MembersInit init;
       for(init = inst.members->first; init; init = init.next)
       {
-         OutputMembersInit(init, f);
+         OutputMembersInit(init, f, bgen);
          if(init.type == dataMembersInit && init.next)
          {
             f.Puts(";\n");
@@ -1434,14 +1438,14 @@ static void OutputInstance(Instantiation inst, File f)
       f.Puts("}");
 }
 
-static void OutputClassFunction(ClassFunction func, File f)
+static void OutputClassFunction(ClassFunction func, File f, bool bgen)
 {
    if(func.specifiers)
    {
       Specifier spec;
       for(spec = func.specifiers->first; spec; spec = spec.next)
       {
-         OutputSpecifier(spec, f, false);
+         OutputSpecifier(spec, f, false, false);
          if(spec.next) f.Puts(" ");
       }
       f.Puts(" ");
@@ -1450,10 +1454,10 @@ static void OutputClassFunction(ClassFunction func, File f)
    {
       //if(func.class != (void *)-1)
       if(func.class)
-         OutputSpecifier(func.class, f, false);
+         OutputSpecifier(func.class, f, false, false);
       f.Puts("::");
    }*/
-   if(func.declarator) OutputDeclarator(func.declarator, f);
+   if(func.declarator) OutputDeclarator(func.declarator, f, bgen);
    f.Puts("\n");
    outputLine ++;
    if(func.declarations)
@@ -1461,14 +1465,14 @@ static void OutputClassFunction(ClassFunction func, File f)
       Declaration decl;
       for(decl = func.declarations->first; decl; decl = decl.next)
       {
-         OutputDeclaration(decl, f);
+         OutputDeclaration(decl, f, bgen);
       }
       f.Puts("\n");
       outputLine ++;
    }
    if(func.body)
    {
-      OutputStatement(func.body, f);
+      OutputStatement(func.body, f, false);
       f.Puts("\n");
       outputLine ++;
    }
@@ -1476,14 +1480,14 @@ static void OutputClassFunction(ClassFunction func, File f)
       f.Puts(";");
 }
 
-static void OutputClassDef(ClassDef def, File f)
+static void OutputClassDef(ClassDef def, File f, bool bgen)
 {
    switch(def.type)
    {
       case declarationClassDef:
          if(def.decl)
          {
-            OutputDeclaration(def.decl, f);
+            OutputDeclaration(def.decl, f, bgen);
             if(def.next && def.next.type != declarationClassDef)
             {
                f.Puts("\n");
@@ -1496,7 +1500,7 @@ static void OutputClassDef(ClassDef def, File f)
          MemberInit init;
          for(init = def.defProperties->first; init; init = init.next)
          {
-            OutputMemberInit(init, f);
+            OutputMemberInit(init, f, bgen);
             if(init.next) f.Puts(", ");
          }
          f.Puts(";\n\n");
@@ -1504,17 +1508,17 @@ static void OutputClassDef(ClassDef def, File f)
          break;
       }
       case functionClassDef:
-         OutputClassFunction(def.function, f);
+         OutputClassFunction(def.function, f, bgen);
          f.Puts("\n");
          outputLine ++;
          break;
    }
 }
 
-static void OutputClass(ClassDefinition _class, File f)
+static void OutputClass(ClassDefinition _class, File f, bool bgen)
 {
    f.Puts("class ");
-   OutputSpecifier(_class._class, f, false);
+   OutputSpecifier(_class._class, f, false, false);
    if(_class.baseSpecs)
    {
       Specifier spec;
@@ -1522,7 +1526,7 @@ static void OutputClass(ClassDefinition _class, File f)
       f.Puts(" : ");
       for(spec = _class.baseSpecs->first; spec; spec = spec.next)
       {
-         OutputSpecifier(spec, f, false);
+         OutputSpecifier(spec, f, false, false);
       }
    }
    if(_class.definitions)
@@ -1532,7 +1536,7 @@ static void OutputClass(ClassDefinition _class, File f)
       outputLine += 2;
       for(def = _class.definitions->first; def; def = def.next)
       {
-         OutputClassDef(def, f);
+         OutputClassDef(def, f, bgen);
       }
       f.Puts("}\n");
       outputLine ++;
@@ -1541,7 +1545,7 @@ static void OutputClass(ClassDefinition _class, File f)
       f.Puts(";");
 }
 
-public void OutputTree(OldList ast, File f)
+public void OutputTree(OldList ast, File f, bool bgen)
 {
    External external;
 
@@ -1552,18 +1556,18 @@ public void OutputTree(OldList ast, File f)
       switch(external.type)
       {
          case functionExternal:
-            OutputFunction(external.function, f);
+            OutputFunction(external.function, f, bgen);
             f.Puts("\n");
             outputLine ++;
             break;
          case declarationExternal:
             if(external.declaration)
-               OutputDeclaration(external.declaration, f);
+               OutputDeclaration(external.declaration, f, bgen);
             f.Puts("\n");
             outputLine ++;
             break;
          case classExternal:
-            OutputClass(external._class, f);
+            OutputClass(external._class, f, bgen);
             f.Puts("\n");
             outputLine ++;
             break;
@@ -1571,23 +1575,23 @@ public void OutputTree(OldList ast, File f)
    }
 }
 
-public void OutputExternal(External external, File f)
+public void OutputExternal(External external, File f, bool bgen)
 {
    switch(external.type)
    {
       case functionExternal:
-         OutputFunction(external.function, f);
+         OutputFunction(external.function, f, bgen);
          f.Puts("\n");
          outputLine ++;
          break;
       case declarationExternal:
          if(external.declaration)
-            OutputDeclaration(external.declaration, f);
+            OutputDeclaration(external.declaration, f, bgen);
          f.Puts("\n");
          outputLine ++;
          break;
       case classExternal:
-         OutputClass(external._class, f);
+         OutputClass(external._class, f, bgen);
          f.Puts("\n");
          outputLine ++;
          break;
@@ -1604,7 +1608,7 @@ public char * StringFromSpecDecl(OldList specs, Declarator decl)
    typeName.qualifiers = specs;
    typeName.declarator = decl;
 
-   OutputTypeName(typeName, f, true);
+   OutputTypeName(typeName, f, true, false);
 
    delete typeName;
 

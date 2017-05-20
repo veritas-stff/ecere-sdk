@@ -910,7 +910,7 @@ static void BindDCOMClient()
                            resultType = MkTypeName(specs, decl);
 
                            f.Printf("            ");
-                           OutputTypeName(resultType, f, false);
+                           OutputTypeName(resultType, f, false, false);
                            f.Printf(";\n");
                         }
 
@@ -951,7 +951,7 @@ static void BindDCOMClient()
                               paramTypeName = MkTypeName(specs, decl);
 
                               f.Printf("            ");
-                              OutputTypeName(paramTypeName, f, false);
+                              OutputTypeName(paramTypeName, f, false, false);
 
                               f.Printf(";\n");
                            }
@@ -1102,7 +1102,7 @@ static void BindDCOMClient()
                      resultType = MkTypeName(specs, decl);
 
                      f.Printf("      ");
-                     OutputTypeName(resultType, f, false);
+                     OutputTypeName(resultType, f, false, false);
                      if(method.dataType.returnType.kind == structType)
                         f.Printf(" = { 0 }");
                      else if(method.dataType.returnType.kind == classType && method.dataType.returnType._class.registered && method.dataType.returnType._class.registered.type == structClass)
@@ -1296,7 +1296,7 @@ static void BindDCOMServer()
                         resultType = MkTypeName(specs, decl);
 
                         f.Printf("            ");
-                        OutputTypeName(resultType, f, false);
+                        OutputTypeName(resultType, f, false, false);
                         f.Printf(";\n");
                      }
 
@@ -1337,7 +1337,7 @@ static void BindDCOMServer()
                            paramTypeName = MkTypeName(specs, decl);
 
                            f.Printf("            ");
-                           OutputTypeName(paramTypeName, f, false);
+                           OutputTypeName(paramTypeName, f, false, false);
 
                            f.Printf(";\n");
                         }
@@ -1478,7 +1478,7 @@ static void BindDCOMServer()
                            resultType = MkTypeName(specs, decl);
 
                            f.Printf("      ");
-                           OutputTypeName(resultType, f, false);
+                           OutputTypeName(resultType, f, false, false);
                            if(method.dataType.returnType.kind == structType)
                               f.Printf(" = { 0 }");
                            else if(method.dataType.returnType.kind == classType && method.dataType.returnType._class.registered && method.dataType.returnType._class.registered.type == structClass)

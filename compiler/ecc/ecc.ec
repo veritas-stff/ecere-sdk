@@ -724,7 +724,7 @@ class CompilerApp : Application
                      // NOTE: If anything is changed up there, the start outputLine must be updated in libec's output.c or Debugging lines will be wrong
 
                      if(ast)
-                        OutputTree(ast, output);
+                        OutputTree(ast, output, false);
                      delete output;
                   }
                }

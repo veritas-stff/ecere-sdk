@@ -1311,7 +1311,7 @@ static void OutputSymbols(const char * fileName)
             f.Printf("   %s\n", definition.name);
             f.Printf("      [Value]\n");
             f.Printf("         ");
-            OutputExpression(defineDefine.exp, f);
+            OutputExpression(defineDefine.exp, f, false);
             f.Printf("\n");
          }
          else if(definition.type == functionDefinition)
